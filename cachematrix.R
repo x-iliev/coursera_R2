@@ -1,6 +1,6 @@
 # makeCacheMatrix is a function that creates an object that 
-# consits of a square matrix and list of functions for 
-# calculating, storing and retrieving the inverse of a square matrix
+# consits of a matrix and a list of functions for calculating, 
+# storing and retrieving it`s inverse 
 
 makeCacheMatrix <- function(x = matrix()) {
   mat_inv <- NULL # set the inverse to NULL
@@ -27,7 +27,11 @@ makeCacheMatrix <- function(x = matrix()) {
 }
 
 
-## Write a short comment describing this function
+
+# cacheSolve is a function that takes the matrix and the functions 
+# to work with it. It then calculates the inverse and stores it in 
+# a variable that can be accessed using methods defined in 
+# makeCacheMatrix
 
 cacheSolve <- function(x, ...) {
   
@@ -39,8 +43,8 @@ cacheSolve <- function(x, ...) {
     return(mat_inv)
   }
   
-  # if the mean is NULL, update the value of 
-  # the matrix with the get() function
+  # if the inverse is NULL (not yet calculated = new matrix), 
+  # update the value of the matrix with the get() function
   data <- x$get() 
   
   # calculate the inverse
