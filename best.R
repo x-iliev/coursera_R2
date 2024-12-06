@@ -1,4 +1,4 @@
-best <- function (state, outcome) {
+best <- function (state, outcome, num=NULL) {
   
   # read data
   data <- read.csv("outcome-of-care-measures.csv", 
@@ -15,10 +15,13 @@ best <- function (state, outcome) {
                 "heart attack"=11, "heart failure"=17, "pneumonia"=23)
   
   d1 <- data[data$State == state, ]
+  
+  if (is.null(num)) {
+    
   num <- which( as.numeric(d1[[out]]) == min(as.numeric(d1[[out]]), na.rm=TRUE) )
-  print(d1$Hospital.Name[ num ] )
-  #d2 <- d1$Hospital.Name[min(d1[,out], na.rm = T)] 
-  #print(d2)
+  }
+  print(min(d1$Hospital.Name[ num ]))
+  
 }
 
 
