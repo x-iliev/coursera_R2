@@ -9,15 +9,15 @@ best <- function (state, outcome) {
                  (! state %in% data$State | 
                     (! outcome %in% data[,c(11,17,23)])))
   
-  # return the hospital with the lowest outcome in that state
+  
+# return the hospital with the lowest outcome in that state
   out <- switch(outcome, 
                 "heart attack"=11, "heart failure"=17, "pneumonia"=23)
   
-  data[data$State == state & data[,out)[min(data[,out], na.rm = T)]
-  
-  
-    
-    
+  d1 <- data[data$State == state, ]
+  print(d1$Hospital.Name[ which(d1[,out] == min(d1[,out], na.rm=T))])
+  #d2 <- d1$Hospital.Name[min(d1[,out], na.rm = T)] 
+  #print(d2)
 }
 
 
