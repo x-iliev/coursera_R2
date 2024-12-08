@@ -31,6 +31,8 @@ rankall <- function (outcome, num=NULL) {
     
   })
   
-  return(as.data.frame(t(new_df)))
+  x <- as.data.frame(t(new_df))
+  colnames(x) <- c("hospital",)
+  return(x)
 }
 
