@@ -1,0 +1,86 @@
+---
+title: "Module 4"
+author: "Hristo Iliev"
+date: "2024-12-16"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# {.tabset}
+
+##  **Text variables**
+
+```{r}
+cameraData <- read.csv("cameras.csv")
+```
+
+```{r}
+names(cameraData)
+
+tolower(names(cameraData))
+
+# remove dot form names
+splitNames = strsplit(names(cameraData), "\\.") # returns list!
+splitNames[[6]][1]
+
+firstElement <- function(x){x[1]}
+sapply(splitNames, firstElement)
+```
+
+```{r}
+reviews <- read.csv("reviews.csv"); solutions <- read.csv("solutions.csv")
+
+names(reviews)
+
+# remove underscores
+sub("_", "", names(reviews),)
+
+# fixing character vecrtors
+testName <- "this_is_a_test"
+sub("_", "", testName) # remove first
+gsub("_", "", testName) # remove all
+
+# finding values
+grep("Alameda", cameraData$intersection)
+
+grepl("Alameda", cameraData$intersection) # logical
+
+table(grepl("Alameda", cameraData$intersection))
+nchar("Hristo Iliev")
+paste0("Hristo", "Iliev")
+strtrim("Hristo   ", width = 6)
+substr(x="Hristo Iliev", start = 1, stop = 4)
+```
+
+## **Dates**
+
+```{r}
+d1 = date()
+d1
+class(d1)
+
+d2 = Sys.Date()
+d2
+class(d2)
+
+format(d2, "%a %b %d")
+
+x = c("1jan1960", "2jan1960", "31mar1960", "30jul1960")
+z = as.Date(x, "%d%b%Y")
+z
+
+z[1] - z[2]
+
+as.numeric(z[1] - z[2])
+
+library(lubridate)
+
+ymd("20140108")
+mdy("08/04/2013")
+ymd_hms("2011-08-03 10:15:03")
+
+```
+
