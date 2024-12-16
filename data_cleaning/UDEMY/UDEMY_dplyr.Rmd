@@ -1,0 +1,412 @@
+---
+title: "UDEMY_dplyr"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# {.tabset}
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+df <- mpg
+str(df)
+```
+
+
+## **select() / rename()**
+
+```{r}
+# extract: manufacturer, model, year
+df.car.info <- select(df, manufacturer, model, year)
+
+# columns that begin with letter "m"
+select(df, starts_with(match = "m"))
+
+# columns that contain letter "r"
+select(df, contains(match = "r"))
+
+# columns that end with letter "y"
+select(df, ends_with("y"))
+
+# select by index (position)
+select(df, 1:3)
+select(df, c(2,5,7))
+select(df, (ncol(df)-2):ncol(df)) # last 3 columns
+
+# rename "manufacturer" and "model"
+df1 <- rename(df, 
+              # new_name = old_name
+              mnfc = manufacturer,
+              mod = model)
+
+# select and rename in one call
+select(df, 
+       mnfc = manufacturer,
+       mod = model,
+       everything())
+```
+
+## **mutate() / transmute()**
+
+```{r}
+# average consumption for cty and hwy
+df <- mutate(df,
+             # new_variable = ...
+             avg = (cty + hwy)/2)
+
+
+df <- mutate(df,
+             car = paste(manufacturer, model, sep = " "),
+             `cyl/trans` = paste(cyl, "cylinders /", trans,"transmission", sep = " "))
+
+head(df)
+
+# create new variables and drop everything else
+transmute(df,
+          avg = (cty + hwy)/2)
+
+
+
+
+
+
+```
+## **filter() / slice()**
+
+```{r}
+df <- mpg
+
+# rows by column condition 
+filter(df,
+       manufacturer == "audi")
+
+filter(df,
+       manufacturer == "audi" & year == 1999)
+
+filter(df,
+       manufacturer == "audi" | manufacturer =="dodge")
+
+filter(df,
+       manufacturer %in% c("audi", "dodge"))
+
+filter(df,
+       hwy >= 30)
+
+# rows by index
+slice(df, 1:5) 
+
+slice(df, (nrow(df)-9):nrow(df))
+```
+
+## **arrange()**
+
+```{r}
+# sort rows by column value
+arrange(df, year)
+
+arrange(df, desc(year))
+
+arrange(df, year, cyl, displ) # resolve ties in order
+```
+
+## **distinct()**
+
+```{r}
+df.example <- data.frame(id = 1:3,
+                         name = c("John", "Max", "Julia"))
+
+df.example <- bind_rows(df.example, slice(df.example, 2)) 
+df.example
+
+df.example <- arrange(df.example, id)
+df.example
+
+distinct(df.example)
+
+df.dupl <- select(df, manufacturer, model)
+df.dupl
+
+distinct(df.dupl, manufacturer)
+```
+
+## **sample_n() / sample_frac()**
+
+```{r}
+set.seed(567)
+
+sample_n(df, size = 5) # 5 random rows
+
+sample_n(df, size = 5, replace = T)
+
+sample_frac(df, size = 0.2, replace = F)
+```
+
+## **summarise()**
+
+```{r}
+summarise(df,
+          'mean hwy' = mean(hwy))
+
+summarise(df,
+          rows = n(),
+          'nr models' = n_distinct(model))
+
+summarise(df,
+          'min hwy' = min(hwy),
+          'min cty' = min(cty))
+```
+
+## **group_by() / count()**
+
+```{r}
+group_by(df, manufacturer) # now is grouped!
+
+summarise(group_by(df, manufacturer), # number of cars for each manufacturer
+          cars = n())
+
+summarise(group_by(df, model),
+          `min hwy` = min(hwy),
+          `min cty` = min(cty))
+
+count(df, model) 
+```
+
+## **%>%**
+
+```{r}
+df %>% 
+  filter(manufacturer == "audi") %>% 
+  count()
+
+df %>% 
+  filter(manufacturer %in% c("dodge", "chevrolet")) %>% 
+  select(manufacturer, model, year, class)
+
+# Calculate avg. hwy and count number of cars for each 
+# manufacturer, model, class, transmission type.
+# Filter for avg. hwy > 30.
+# Sort in descending order
+df %>% 
+  group_by(manufacturer, model, class, trans) %>% # 114 groups!
+  summarise(`mean hwy` = mean(hwy),
+            cars = n()) %>% 
+  ungroup() %>% 
+  filter(`mean hwy` > 30) %>% 
+  arrange(desc(`mean hwy`))
+```
+
+## **pivot()**
+
+```{r}
+table.long <- data.frame(id = 1:6,
+                         type = c("a", "b", "a", "c", "c", "a"),
+                         count = c(20, 50, 45, 15, 12, 5))
+table.long
+
+# each type has it's own column
+table.wide <- pivot_wider(table.long,
+                          names_from = type,
+                          values_from = count)
+table.wide
+
+table.long1 <- pivot_longer(table.wide, 
+                            cols = c("a", "b", "c"),
+                            names_to = "type",
+                            values_to = "count",
+                            values_drop_na = T)
+table.long1
+             
+# filter rows "jeep" or "landrover" or "hyundai"
+# select model, transmission, hwy
+# calculate avh.hwy for each model and transmission
+# wide format by transmission
+
+df.long <- df %>% 
+  filter(manufacturer %in% c("jeep", "landrover", "hyundai")) %>% 
+  select(model, trans, hwy) %>% 
+  group_by(model, trans) %>%
+  summarise(`mean hwy`= mean(hwy)) %>% 
+  ungroup()
+df.long
+
+df.wide <- df.long %>% 
+  pivot_wider(names_from = trans,
+              values_from = `mean hwy`)
+df.wide
+
+df.long1 <- df.wide %>% 
+  pivot_longer(-model, # exclude column "model"
+               names_to = "trans",
+               values_to = "mean hwy",
+               values_drop_na = T) 
+```
+
+## **separate() / unite()**
+
+```{r}
+# tidyr
+dates <- seq.Date(from = as.Date("2021-01-01"),
+                  to = as.Date("2021-12-31"),
+                  by = "day")
+table <- data.frame(date = dates)
+head(table)
+
+# split into year, month, and day
+# remove leading zeros
+# sort columns
+table.sep <- table %>% 
+  separate(data = .,
+           col = date,
+           into = c("year", "month", "day"),
+           sep = "-") %>% 
+#  mutate(month = as.numeric(month),
+#         day = as.numeric(day)) %>% 
+  mutate_at(.tbl = .,
+            .vars = c("month", "day"),
+            .funs = as.numeric) %>% 
+  arrange(year, month, day)
+head(table.sep)
+
+library(stringr)
+
+# merge year, month, day
+# add leading zeros (stringr)
+table.unite <- table.sep %>% 
+  mutate_at(.tbl=.,
+            .vars = c("month", "day"),
+            .funs = str_pad, 2, "left", "0") %>% 
+  unite(data = .,
+        col = "date",
+        year, month, day,
+        sep = "-")
+head(table.unite)
+```
+
+## **ACTION**
+
+```{r}
+# pull() - extract column as a vector
+df %>% pull(hwy) %>% head()
+
+# group_by() + mutate()
+df %>% 
+  group_by(manufacturer, model) %>% 
+  mutate(`avg hwy` = mean(hwy)) %>%  # new column, same number of rows 
+  ungroup()
+
+# case_when()
+df <- df %>% 
+  mutate(trans_ = str_sub(string = trans,
+                          start = 1,
+                          end = 1)) %>% 
+  mutate(`transmission type` = case_when(trans_ == "a" ~ "automatic",
+                                         trans_ == "m" ~ "manual",
+                                         TRUE ~ "NA")) %>% 
+  select(-trans_)
+
+df %>% count(`transmission type`, trans)
+
+# row_number()
+df <- df %>% 
+  mutate(`car id` = row_number())
+
+df <- df %>% 
+  group_by(manufacturer) %>% 
+  mutate(`car id 1` = row_number()) %>% # car id per manufacturer
+  print()
+```
+
+```{r}
+# HFLIGHTS
+library(hflights)
+
+df <- hflights
+
+nrow(df); ncol(df)
+
+df %>% 
+  count(UniqueCarrier, FlightNum, TailNum, Year, Month, DayofMonth) %>% 
+  head()
+
+# how many columns begin with "Taxi"
+df %>% 
+  select(starts_with("Taxi")) %>% 
+  head()
+
+# how many flights with < 1000 miles / >= 1000 miles
+df %>% 
+  mutate(dist1000 = case_when(Distance < 1000 ~ "< 1000 miles",
+                             Distance >= 1000 ~ ">= 1000 miles")) %>% 
+  count(dist1000) %>% 
+  head()
+
+# flights per carrier - sort by top to bottom
+df %>% 
+  group_by(UniqueCarrier) %>% 
+  count() %>% 
+  ungroup() %>% 
+  arrange(desc(n)) %>% 
+  head()
+
+# number of cancelled flights per carrier
+df %>% 
+  filter(Cancelled == 1) %>% 
+  group_by(UniqueCarrier) %>% 
+  count() %>% 
+  ungroup() %>% 
+  arrange(desc(n)) %>% 
+  head()
+
+# percentage of cancelled flights per carrier
+df %>% 
+  # count flights by cancellation
+  group_by(UniqueCarrier, Cancelled) %>% 
+  count() %>% 
+  ungroup() %>% 
+  # calculate total flights
+  group_by(UniqueCarrier) %>% 
+  mutate(`n total` = sum(n)) %>% 
+  ungroup() %>% 
+  mutate(`n percent %` = (n / `n total`) * 100) %>% 
+  filter(Cancelled == 1) %>% 
+  arrange(desc(`n percent %`)) %>% 
+  head()
+
+# create "date" = year + month + day
+df %>% 
+  # add leading zeros
+  mutate_at(.vars = c("Month", "DayofMonth"),
+            .funs = str_pad, 2, "left", "0") %>% 
+  unite(col = date,
+        Year, Month, DayofMonth,
+        sep = "-") %>% 
+  head()
+
+# count flights per cancelled codes (codes in columns)
+# adn per carriers (in rows)
+
+df %>% count(CancellationCode)
+df %>% 
+  mutate(CancellationCode = case_when(CancellationCode == "" ~ "0",
+                                      TRUE ~ CancellationCode)) %>% 
+  group_by(UniqueCarrier, CancellationCode) %>% 
+  count() %>% 
+  ungroup() %>% 
+  pivot_wider(names_from = CancellationCode,
+              values_from = n,
+              values_fill = 0) %>% 
+  head()
+  
+```
+
+
+
+
+

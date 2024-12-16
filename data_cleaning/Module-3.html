@@ -9,9 +9,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
-<meta name="author" content="Hristo Iliev" />
 
-<meta name="date" content="2024-12-11" />
 
 <title>Module 3</title>
 
@@ -351,12 +349,14 @@ display: none;
 
 
 <h1 class="title toc-ignore">Module 3</h1>
-<h4 class="author">Hristo Iliev</h4>
-<h4 class="date">2024-12-11</h4>
 
 </div>
 
 
+<div id="section" class="section level1 tabset">
+<h1 class="tabset"></h1>
+<div id="subsetting-and-sorting" class="section level2">
+<h2>Subsetting and sorting</h2>
 <pre class="r"><code>set.seed(13435)
 X &lt;- data.frame(&quot;var1&quot;=sample(1:5), 
                 &quot;var2&quot;=sample(6:10),
@@ -388,6 +388,611 @@ X[X$var1 &lt;= 3 &amp; X$var3 &gt; 11, ]</code></pre>
 ## 5    2   NA   11
 ## 1    3   NA   14
 ## 2    1    7   15</code></pre>
+<pre class="r"><code># which() ignores NAs
+X[which(X$var2 &gt; 8),] </code></pre>
+<pre><code>##   var1 var2 var3
+## 4    4   10   12</code></pre>
+<pre class="r"><code># Sorting
+sort(X$var1, decreasing = T)</code></pre>
+<pre><code>## [1] 5 4 3 2 1</code></pre>
+<pre class="r"><code>sort(X$var2, decreasing = T, na.last = T)</code></pre>
+<pre><code>## [1] 10  7  6 NA NA</code></pre>
+<pre class="r"><code># Ordering
+X[order(X$var1), ]</code></pre>
+<pre><code>##   var1 var2 var3
+## 2    1    7   15
+## 5    2   NA   11
+## 1    3   NA   14
+## 4    4   10   12
+## 3    5    6   13</code></pre>
+<pre class="r"><code>X[order(X$var1, X$var3), ]</code></pre>
+<pre><code>##   var1 var2 var3
+## 2    1    7   15
+## 5    2   NA   11
+## 1    3   NA   14
+## 4    4   10   12
+## 3    5    6   13</code></pre>
+<pre class="r"><code># Adding rows and columns
+X$var4 &lt;- rnorm(5)
+X</code></pre>
+<pre><code>##   var1 var2 var3       var4
+## 5    2   NA   11 -0.4150458
+## 4    4   10   12  2.5437602
+## 1    3   NA   14  1.5545298
+## 2    1    7   15 -0.6192328
+## 3    5    6   13 -0.9261035</code></pre>
+</div>
+<div id="creating-new-variables" class="section level2">
+<h2>Creating new variables</h2>
+<pre class="r"><code># Creating sequences
+s1 &lt;- seq(1,10,by=2); s1</code></pre>
+<pre><code>## [1] 1 3 5 7 9</code></pre>
+<pre class="r"><code>s2 &lt;- seq(1,10, length=3); s2</code></pre>
+<pre><code>## [1]  1.0  5.5 10.0</code></pre>
+<pre class="r"><code>x &lt;- c(1,3,5,6,7,10)
+seq(along=x)</code></pre>
+<pre><code>## [1] 1 2 3 4 5 6</code></pre>
+<pre class="r"><code># Subsetting variables
+restData &lt;- read.csv(&quot;restaurants.csv&quot;)
+restData$nearMe &lt;- restData$neighborhood %in% c(&quot;Roland Park&quot;, 
+                                                &quot;Homeland&quot;)
+table(restData$nearMe)</code></pre>
+<pre><code>## 
+## FALSE  TRUE 
+##  1314    13</code></pre>
+<pre class="r"><code># Creating BINARY variables
+restData$zipWrong &lt;- ifelse(restData$zipCode &lt; 0, T, F)
+table(restData$zipWrong)</code></pre>
+<pre><code>## 
+## FALSE  TRUE 
+##  1326     1</code></pre>
+<pre class="r"><code>table(restData$zipWrong, restData$zipCode &lt; 0)</code></pre>
+<pre><code>##        
+##         FALSE TRUE
+##   FALSE  1326    0
+##   TRUE      0    1</code></pre>
+<pre class="r"><code># Creating CATEGORICAL variables
+restData$zipGroups &lt;- cut(restData$zipCode,
+                          breaks = quantile(restData$zipCode))
+table(restData$zipGroups, restData$zipCode)</code></pre>
+<pre><code>##                        
+##                         -21226 21201 21202 21205 21206 21207 21208 21209 21210
+##   (-2.123e+04,2.12e+04]      0   136   201     0     0     0     0     0     0
+##   (2.12e+04,2.122e+04]       0     0     0    27    30     4     1     8    23
+##   (2.122e+04,2.123e+04]      0     0     0     0     0     0     0     0     0
+##   (2.123e+04,2.129e+04]      0     0     0     0     0     0     0     0     0
+##                        
+##                         21211 21212 21213 21214 21215 21216 21217 21218 21220
+##   (-2.123e+04,2.12e+04]     0     0     0     0     0     0     0     0     0
+##   (2.12e+04,2.122e+04]     41    28    31    17    54    10    32    69     0
+##   (2.122e+04,2.123e+04]     0     0     0     0     0     0     0     0     1
+##   (2.123e+04,2.129e+04]     0     0     0     0     0     0     0     0     0
+##                        
+##                         21222 21223 21224 21225 21226 21227 21229 21230 21231
+##   (-2.123e+04,2.12e+04]     0     0     0     0     0     0     0     0     0
+##   (2.12e+04,2.122e+04]      0     0     0     0     0     0     0     0     0
+##   (2.122e+04,2.123e+04]     7    56   199    19     0     0     0     0     0
+##   (2.123e+04,2.129e+04]     0     0     0     0    18     4    13   156   127
+##                        
+##                         21234 21237 21239 21251 21287
+##   (-2.123e+04,2.12e+04]     0     0     0     0     0
+##   (2.12e+04,2.122e+04]      0     0     0     0     0
+##   (2.122e+04,2.123e+04]     0     0     0     0     0
+##   (2.123e+04,2.129e+04]     7     1     3     2     1</code></pre>
+<pre class="r"><code># Easier cutting
+library(Hmisc)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;Hmisc&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     format.pval, units</code></pre>
+<pre class="r"><code>restData$zipGroups &lt;- cut2(restData$zipCode, g=4) # factor! 
+class(restData$zipGroups) </code></pre>
+<pre><code>## [1] &quot;factor&quot;</code></pre>
+<pre class="r"><code>table(restData$zipGroups)</code></pre>
+<pre><code>## 
+## [-21226,21205) [ 21205,21220) [ 21220,21227) [ 21227,21287] 
+##            338            375            300            314</code></pre>
+<pre class="r"><code># Creating FACTOR variables
+restData$zcf &lt;- factor(restData$zipCode)
+restData$zcf[1:5]</code></pre>
+<pre><code>## [1] 21206 21231 21224 21211 21223
+## 32 Levels: -21226 21201 21202 21205 21206 21207 21208 21209 21210 ... 21287</code></pre>
+<pre class="r"><code>yesno &lt;- factor(sample(c(&quot;yes&quot;, &quot;no&quot;), 10, replace = T)); yesno # no/yes</code></pre>
+<pre><code>##  [1] no  yes no  yes yes yes no  yes no  no 
+## Levels: no yes</code></pre>
+<pre class="r"><code>yesno &lt;- relevel(yesno, ref=&quot;yes&quot;); yesno # yes/no </code></pre>
+<pre><code>##  [1] no  yes no  yes yes yes no  yes no  no 
+## Levels: yes no</code></pre>
+<pre class="r"><code># MUTATE
+library(dplyr)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;dplyr&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:Hmisc&#39;:
+## 
+##     src, summarize</code></pre>
+<pre><code>## The following objects are masked from &#39;package:stats&#39;:
+## 
+##     filter, lag</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     intersect, setdiff, setequal, union</code></pre>
+<pre class="r"><code>restData &lt;- mutate(restData, zipGroups=cut2(zipCode, g=4))
+table(restData$zipGroups)</code></pre>
+<pre><code>## 
+## [-21226,21205) [ 21205,21220) [ 21220,21227) [ 21227,21287] 
+##            338            375            300            314</code></pre>
+</div>
+<div id="summarizing-data" class="section level2">
+<h2>Summarizing data</h2>
+<pre class="r"><code># Quantiles of quantitative variables
+quantile(restData$councilDistrict, na.rm = T)</code></pre>
+<pre><code>##   0%  25%  50%  75% 100% 
+##    1    2    9   11   14</code></pre>
+<pre class="r"><code>quantile(restData$councilDistrict, probs = c(.25, .75, .9))</code></pre>
+<pre><code>## 25% 75% 90% 
+##   2  11  12</code></pre>
+<pre class="r"><code># Make table
+table(restData$zipCode, useNA = &quot;ifany&quot;)</code></pre>
+<pre><code>## 
+## -21226  21201  21202  21205  21206  21207  21208  21209  21210  21211  21212 
+##      1    136    201     27     30      4      1      8     23     41     28 
+##  21213  21214  21215  21216  21217  21218  21220  21222  21223  21224  21225 
+##     31     17     54     10     32     69      1      7     56    199     19 
+##  21226  21227  21229  21230  21231  21234  21237  21239  21251  21287 
+##     18      4     13    156    127      7      1      3      2      1</code></pre>
+<pre class="r"><code># Check for missing values
+sum(is.na(restData$councilDistrict))</code></pre>
+<pre><code>## [1] 0</code></pre>
+<pre class="r"><code>any(is.na(restData$councilDistrict))</code></pre>
+<pre><code>## [1] FALSE</code></pre>
+<pre class="r"><code>all(restData$zipCode &gt; 0)</code></pre>
+<pre><code>## [1] FALSE</code></pre>
+<pre class="r"><code>colSums(is.na(restData))</code></pre>
+<pre><code>##            name         zipCode    neighborhood councilDistrict  policeDistrict 
+##               0               0               0               0               0 
+##      Location.1          nearMe        zipWrong       zipGroups             zcf 
+##               0               0               0               0               0</code></pre>
+<pre class="r"><code>all(colSums(is.na(restData)) == 0)</code></pre>
+<pre><code>## [1] TRUE</code></pre>
+<pre class="r"><code># Values with specific characteristics
+table(restData$zipCode %in% c(&quot;21212&quot;))</code></pre>
+<pre><code>## 
+## FALSE  TRUE 
+##  1299    28</code></pre>
+<pre class="r"><code>table(restData$zipCode %in% c(&quot;21212&quot;, &quot;21213&quot;))</code></pre>
+<pre><code>## 
+## FALSE  TRUE 
+##  1268    59</code></pre>
+<pre class="r"><code>head(restData[restData$zipCode %in% c(&quot;21212&quot;, &quot;21213&quot;), ])</code></pre>
+<pre><code>##                           name zipCode              neighborhood
+## 29           BAY ATLANTIC CLUB   21212                  Downtown
+## 39                 BERMUDA BAR   21213             Broadway East
+## 92                   ATWATER&#39;S   21212 Chinquapin Park-Belvedere
+## 111 BALTIMORE ESTONIAN SOCIETY   21213        South Clifton Park
+## 187                   CAFE ZEN   21212                  Rosebank
+## 220        CERIELLO FINE FOODS   21212 Chinquapin Park-Belvedere
+##     councilDistrict policeDistrict                         Location.1 nearMe
+## 29               11        CENTRAL    206 REDWOOD ST\nBaltimore, MD\n  FALSE
+## 39               12        EASTERN    1801 NORTH AVE\nBaltimore, MD\n  FALSE
+## 92                4       NORTHERN 529 BELVEDERE AVE\nBaltimore, MD\n  FALSE
+## 111              12        EASTERN    1932 BELAIR RD\nBaltimore, MD\n  FALSE
+## 187               4       NORTHERN 438 BELVEDERE AVE\nBaltimore, MD\n  FALSE
+## 220               4       NORTHERN 529 BELVEDERE AVE\nBaltimore, MD\n  FALSE
+##     zipWrong      zipGroups   zcf
+## 29     FALSE [ 21205,21220) 21212
+## 39     FALSE [ 21205,21220) 21213
+## 92     FALSE [ 21205,21220) 21212
+## 111    FALSE [ 21205,21220) 21213
+## 187    FALSE [ 21205,21220) 21212
+## 220    FALSE [ 21205,21220) 21212</code></pre>
+<pre class="r"><code># Cross tabs
+data(&quot;UCBAdmissions&quot;)
+DF &lt;- as.data.frame(UCBAdmissions)
+summary(DF)</code></pre>
+<pre><code>##       Admit       Gender   Dept       Freq      
+##  Admitted:12   Male  :12   A:4   Min.   :  8.0  
+##  Rejected:12   Female:12   B:4   1st Qu.: 80.0  
+##                            C:4   Median :170.0  
+##                            D:4   Mean   :188.6  
+##                            E:4   3rd Qu.:302.5  
+##                            F:4   Max.   :512.0</code></pre>
+<pre class="r"><code>xt &lt;- xtabs(Freq ~ Gender + Admit, data=DF); xt</code></pre>
+<pre><code>##         Admit
+## Gender   Admitted Rejected
+##   Male       1198     1493
+##   Female      557     1278</code></pre>
+<pre class="r"><code># Flat tables
+warpbreaks$replicate &lt;- rep(1:9, len=54)
+xt &lt;- xtabs(breaks ~ .,data=warpbreaks); xt</code></pre>
+<pre><code>## , , replicate = 1
+## 
+##     tension
+## wool  L  M  H
+##    A 26 18 36
+##    B 27 42 20
+## 
+## , , replicate = 2
+## 
+##     tension
+## wool  L  M  H
+##    A 30 21 21
+##    B 14 26 21
+## 
+## , , replicate = 3
+## 
+##     tension
+## wool  L  M  H
+##    A 54 29 24
+##    B 29 19 24
+## 
+## , , replicate = 4
+## 
+##     tension
+## wool  L  M  H
+##    A 25 17 18
+##    B 19 16 17
+## 
+## , , replicate = 5
+## 
+##     tension
+## wool  L  M  H
+##    A 70 12 10
+##    B 29 39 13
+## 
+## , , replicate = 6
+## 
+##     tension
+## wool  L  M  H
+##    A 52 18 43
+##    B 31 28 15
+## 
+## , , replicate = 7
+## 
+##     tension
+## wool  L  M  H
+##    A 51 35 28
+##    B 41 21 15
+## 
+## , , replicate = 8
+## 
+##     tension
+## wool  L  M  H
+##    A 26 30 15
+##    B 20 39 16
+## 
+## , , replicate = 9
+## 
+##     tension
+## wool  L  M  H
+##    A 67 36 26
+##    B 44 29 28</code></pre>
+<pre class="r"><code>head(ftable(xt))</code></pre>
+<pre><code>##                                                                  
+##                   &quot;replicate&quot; &quot;1&quot; &quot;2&quot; &quot;3&quot; &quot;4&quot; &quot;5&quot; &quot;6&quot; &quot;7&quot; &quot;8&quot; &quot;9&quot;
+##  &quot;wool&quot; &quot;tension&quot;                                                
+##  &quot;A&quot;    &quot;L&quot;                    26  30  54  25  70  52  51  26  67
+##         &quot;M&quot;                    18  21  29  17  12  18  35  30  36
+##         &quot;H&quot;                    36  21  24  18  10  43  28  15  26
+##  &quot;B&quot;    &quot;L&quot;                    27  14  29  19  29  31  41  20  44
+##         &quot;M&quot;                    42  26  19  16  39  28  21  39  29
+##         &quot;H&quot;                    20  21  24  17  13  15  15  16  28</code></pre>
+</div>
+<div id="reshape-data" class="section level2">
+<h2>Reshape data</h2>
+<pre class="r"><code>library(reshape2)
+
+# Melting data frames
+mtcars$carname &lt;- rownames(mtcars)
+carMelt &lt;- melt(mtcars, 
+                id = c(&quot;carname&quot;, &quot;gear&quot;, &quot;cyl&quot;),
+                measure.vars = c(&quot;mpg&quot;, &quot;hp&quot;))
+head(carMelt)</code></pre>
+<pre><code>##             carname gear cyl variable value
+## 1         Mazda RX4    4   6      mpg  21.0
+## 2     Mazda RX4 Wag    4   6      mpg  21.0
+## 3        Datsun 710    4   4      mpg  22.8
+## 4    Hornet 4 Drive    3   6      mpg  21.4
+## 5 Hornet Sportabout    3   8      mpg  18.7
+## 6           Valiant    3   6      mpg  18.1</code></pre>
+<pre class="r"><code>tail(carMelt)</code></pre>
+<pre><code>##           carname gear cyl variable value
+## 59  Porsche 914-2    5   4       hp    91
+## 60   Lotus Europa    5   4       hp   113
+## 61 Ford Pantera L    5   8       hp   264
+## 62   Ferrari Dino    5   6       hp   175
+## 63  Maserati Bora    5   8       hp   335
+## 64     Volvo 142E    4   4       hp   109</code></pre>
+<pre class="r"><code># Reshape
+cylData &lt;- dcast(carMelt, cyl ~ variable)</code></pre>
+<pre><code>## Aggregation function missing: defaulting to length</code></pre>
+<pre class="r"><code>cylData</code></pre>
+<pre><code>##   cyl mpg hp
+## 1   4  11 11
+## 2   6   7  7
+## 3   8  14 14</code></pre>
+<pre class="r"><code>cylData &lt;- dcast(carMelt, cyl ~ variable, mean)
+cylData</code></pre>
+<pre><code>##   cyl      mpg        hp
+## 1   4 26.66364  82.63636
+## 2   6 19.74286 122.28571
+## 3   8 15.10000 209.21429</code></pre>
+<pre class="r"><code>head(InsectSprays)</code></pre>
+<pre><code>##   count spray
+## 1    10     A
+## 2     7     A
+## 3    20     A
+## 4    14     A
+## 5    14     A
+## 6    12     A</code></pre>
+<pre class="r"><code>tapply(InsectSprays$count, InsectSprays$spray, sum)</code></pre>
+<pre><code>##   A   B   C   D   E   F 
+## 174 184  25  59  42 200</code></pre>
+<pre class="r"><code>spIns &lt;- split(InsectSprays$count, InsectSprays$spray)
+spIns # list!</code></pre>
+<pre><code>## $A
+##  [1] 10  7 20 14 14 12 10 23 17 20 14 13
+## 
+## $B
+##  [1] 11 17 21 11 16 14 17 17 19 21  7 13
+## 
+## $C
+##  [1] 0 1 7 2 3 1 2 1 3 0 1 4
+## 
+## $D
+##  [1]  3  5 12  6  4  3  5  5  5  5  2  4
+## 
+## $E
+##  [1] 3 5 3 5 3 6 1 1 3 2 6 4
+## 
+## $F
+##  [1] 11  9 15 22 15 16 13 10 26 26 24 13</code></pre>
+<pre class="r"><code>sprCount &lt;- lapply(spIns, sum)
+sprCount</code></pre>
+<pre><code>## $A
+## [1] 174
+## 
+## $B
+## [1] 184
+## 
+## $C
+## [1] 25
+## 
+## $D
+## [1] 59
+## 
+## $E
+## [1] 42
+## 
+## $F
+## [1] 200</code></pre>
+<pre class="r"><code>unlist(sprCount)</code></pre>
+<pre><code>##   A   B   C   D   E   F 
+## 174 184  25  59  42 200</code></pre>
+<pre class="r"><code>sapply(spIns, sum)</code></pre>
+<pre><code>##   A   B   C   D   E   F 
+## 174 184  25  59  42 200</code></pre>
+<pre class="r"><code>library(plyr)</code></pre>
+<pre><code>## ------------------------------------------------------------------------------</code></pre>
+<pre><code>## You have loaded plyr after dplyr - this is likely to cause problems.
+## If you need functions from both plyr and dplyr, please load plyr first, then dplyr:
+## library(plyr); library(dplyr)</code></pre>
+<pre><code>## ------------------------------------------------------------------------------</code></pre>
+<pre><code>## 
+## Attaching package: &#39;plyr&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:dplyr&#39;:
+## 
+##     arrange, count, desc, failwith, id, mutate, rename, summarise,
+##     summarize</code></pre>
+<pre><code>## The following objects are masked from &#39;package:Hmisc&#39;:
+## 
+##     is.discrete, summarize</code></pre>
+<pre class="r"><code>ddply(InsectSprays, .(spray), summarize, sum=sum(count))</code></pre>
+<pre><code>##   spray sum
+## 1     A 174
+## 2     B 184
+## 3     C  25
+## 4     D  59
+## 5     E  42
+## 6     F 200</code></pre>
+<pre class="r"><code>spraySums &lt;- ddply(InsectSprays, .(spray), summarize, 
+                   sum=ave(count, FUN=sum))
+dim(spraySums)</code></pre>
+<pre><code>## [1] 72  2</code></pre>
+</div>
+<div id="dplyr" class="section level2">
+<h2>dplyr</h2>
+<pre class="r"><code>library(dplyr)
+
+chicago &lt;- readRDS(&quot;chicago.rds&quot;)
+dim(chicago)</code></pre>
+<pre><code>## [1] 6940    8</code></pre>
+<pre class="r"><code>str(chicago)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    6940 obs. of  8 variables:
+##  $ city      : chr  &quot;chic&quot; &quot;chic&quot; &quot;chic&quot; &quot;chic&quot; ...
+##  $ tmpd      : num  31.5 33 33 29 32 40 34.5 29 26.5 32.5 ...
+##  $ dptp      : num  31.5 29.9 27.4 28.6 28.9 ...
+##  $ date      : Date, format: &quot;1987-01-01&quot; &quot;1987-01-02&quot; ...
+##  $ pm25tmean2: num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ pm10tmean2: num  34 NA 34.2 47 NA ...
+##  $ o3tmean2  : num  4.25 3.3 3.33 4.38 4.75 ...
+##  $ no2tmean2 : num  20 23.2 23.8 30.4 30.3 ...</code></pre>
+<pre class="r"><code>names(chicago)</code></pre>
+<pre><code>## [1] &quot;city&quot;       &quot;tmpd&quot;       &quot;dptp&quot;       &quot;date&quot;       &quot;pm25tmean2&quot;
+## [6] &quot;pm10tmean2&quot; &quot;o3tmean2&quot;   &quot;no2tmean2&quot;</code></pre>
+<pre class="r"><code># select() columns
+head(select(chicago, city:dptp))</code></pre>
+<pre><code>##   city tmpd   dptp
+## 1 chic 31.5 31.500
+## 2 chic 33.0 29.875
+## 3 chic 33.0 27.375
+## 4 chic 29.0 28.625
+## 5 chic 32.0 28.875
+## 6 chic 40.0 35.125</code></pre>
+<pre class="r"><code>head(select(chicago, -(city:dptp)))</code></pre>
+<pre><code>##         date pm25tmean2 pm10tmean2 o3tmean2 no2tmean2
+## 1 1987-01-01         NA   34.00000 4.250000  19.98810
+## 2 1987-01-02         NA         NA 3.304348  23.19099
+## 3 1987-01-03         NA   34.16667 3.333333  23.81548
+## 4 1987-01-04         NA   47.00000 4.375000  30.43452
+## 5 1987-01-05         NA         NA 4.750000  30.33333
+## 6 1987-01-06         NA   48.00000 5.833333  25.77233</code></pre>
+<pre class="r"><code># filter() rows
+chic.f &lt;- filter(chicago, pm25tmean2 &gt; 30)
+head(chic.f)</code></pre>
+<pre><code>##   city tmpd dptp       date pm25tmean2 pm10tmean2  o3tmean2 no2tmean2
+## 1 chic   23 21.9 1998-01-17      38.10   32.46154  3.180556  25.30000
+## 2 chic   28 25.8 1998-01-23      33.95   38.69231  1.750000  29.37630
+## 3 chic   55 51.3 1998-04-30      39.40   34.00000 10.786232  25.31310
+## 4 chic   59 53.7 1998-05-01      35.40   28.50000 14.295125  31.42905
+## 5 chic   57 52.0 1998-05-02      33.30   35.00000 20.662879  26.79861
+## 6 chic   57 56.0 1998-05-07      32.10   34.50000 24.270422  33.99167</code></pre>
+<pre class="r"><code>chic.f &lt;- filter(chicago, pm25tmean2 &gt; 30 &amp; tmpd &gt; 80)
+chic.f</code></pre>
+<pre><code>##    city tmpd dptp       date pm25tmean2 pm10tmean2 o3tmean2 no2tmean2
+## 1  chic   81 71.2 1998-08-23   39.60000       59.0 45.86364  14.32639
+## 2  chic   81 70.4 1998-09-06   31.50000       50.5 50.66250  20.31250
+## 3  chic   82 72.2 2001-07-20   32.30000       58.5 33.00380  33.67500
+## 4  chic   84 72.9 2001-08-01   43.70000       81.5 45.17736  27.44239
+## 5  chic   85 72.6 2001-08-08   38.83750       70.0 37.98047  27.62743
+## 6  chic   84 72.6 2001-08-09   38.20000       66.0 36.73245  26.46742
+## 7  chic   82 67.4 2002-06-20   33.00000       80.5 47.42673  30.76703
+## 8  chic   82 63.5 2002-06-23   42.50000       65.0 54.88043  30.03913
+## 9  chic   81 70.4 2002-07-08   33.10000       64.0 45.34969  27.67857
+## 10 chic   82 66.2 2002-07-18   38.85000       72.5 44.98045  26.06905
+## 11 chic   82 65.1 2003-06-25   33.90000       66.0 56.13666  22.94934
+## 12 chic   84 68.4 2003-07-04   32.90000       47.5 45.66146  21.34375
+## 13 chic   86 63.4 2005-06-24   31.85714       74.0 50.96649  23.75000
+## 14 chic   82 64.6 2005-06-27   51.53750       79.0 55.23586  28.54937
+## 15 chic   85 64.1 2005-06-28   31.20000       57.5 50.29144  26.55398
+## 16 chic   84 67.0 2005-07-17   32.70000       42.5 44.64323  16.27083
+## 17 chic   84 69.0 2005-08-03   37.90000       64.0 39.32111  23.61932</code></pre>
+<pre class="r"><code># arrange() rows by values in a column
+chicago &lt;- arrange(chicago, date)
+head(chicago)</code></pre>
+<pre><code>##   city tmpd   dptp       date pm25tmean2 pm10tmean2 o3tmean2 no2tmean2
+## 1 chic 31.5 31.500 1987-01-01         NA   34.00000 4.250000  19.98810
+## 2 chic 33.0 29.875 1987-01-02         NA         NA 3.304348  23.19099
+## 3 chic 33.0 27.375 1987-01-03         NA   34.16667 3.333333  23.81548
+## 4 chic 29.0 28.625 1987-01-04         NA   47.00000 4.375000  30.43452
+## 5 chic 32.0 28.875 1987-01-05         NA         NA 4.750000  30.33333
+## 6 chic 40.0 35.125 1987-01-06         NA   48.00000 5.833333  25.77233</code></pre>
+<pre class="r"><code>chicago &lt;- arrange(chicago, desc(date))
+head(chicago)</code></pre>
+<pre><code>##   city tmpd dptp       date pm25tmean2 pm10tmean2  o3tmean2 no2tmean2
+## 1 chic   35 30.1 2005-12-31   15.00000       23.5  2.531250  13.25000
+## 2 chic   36 31.0 2005-12-30   15.05714       19.2  3.034420  22.80556
+## 3 chic   35 29.4 2005-12-29    7.45000       23.5  6.794837  19.97222
+## 4 chic   37 34.5 2005-12-28   17.75000       27.5  3.260417  19.28563
+## 5 chic   40 33.6 2005-12-27   23.56000       27.0  4.468750  23.50000
+## 6 chic   35 29.6 2005-12-26    8.40000        8.5 14.041667  16.81944</code></pre>
+<pre class="r"><code># rename() columns
+chicago &lt;- dplyr::rename(chicago, pm25 = pm25tmean2, 
+                  dewpoint = dptp)
+head(chicago)</code></pre>
+<pre><code>##   city tmpd dewpoint       date     pm25 pm10tmean2  o3tmean2 no2tmean2
+## 1 chic   35     30.1 2005-12-31 15.00000       23.5  2.531250  13.25000
+## 2 chic   36     31.0 2005-12-30 15.05714       19.2  3.034420  22.80556
+## 3 chic   35     29.4 2005-12-29  7.45000       23.5  6.794837  19.97222
+## 4 chic   37     34.5 2005-12-28 17.75000       27.5  3.260417  19.28563
+## 5 chic   40     33.6 2005-12-27 23.56000       27.0  4.468750  23.50000
+## 6 chic   35     29.6 2005-12-26  8.40000        8.5 14.041667  16.81944</code></pre>
+<pre class="r"><code># mutate() existing variables or create new ones
+chicago &lt;- mutate(chicago, pm25dtrend=pm25-mean(pm25, na.rm=T))
+head(chicago)</code></pre>
+<pre><code>##   city tmpd dewpoint       date     pm25 pm10tmean2  o3tmean2 no2tmean2
+## 1 chic   35     30.1 2005-12-31 15.00000       23.5  2.531250  13.25000
+## 2 chic   36     31.0 2005-12-30 15.05714       19.2  3.034420  22.80556
+## 3 chic   35     29.4 2005-12-29  7.45000       23.5  6.794837  19.97222
+## 4 chic   37     34.5 2005-12-28 17.75000       27.5  3.260417  19.28563
+## 5 chic   40     33.6 2005-12-27 23.56000       27.0  4.468750  23.50000
+## 6 chic   35     29.6 2005-12-26  8.40000        8.5 14.041667  16.81944
+##   pm25dtrend
+## 1  -1.230958
+## 2  -1.173815
+## 3  -8.780958
+## 4   1.519042
+## 5   7.329042
+## 6  -7.830958</code></pre>
+<pre class="r"><code>chicago &lt;- mutate(chicago, 
+                  tempcat = factor(1 * (tmpd &gt; 80), 
+                                   labels = c(&quot;cold&quot;, &quot;hot&quot;)))
+head(chicago)</code></pre>
+<pre><code>##   city tmpd dewpoint       date     pm25 pm10tmean2  o3tmean2 no2tmean2
+## 1 chic   35     30.1 2005-12-31 15.00000       23.5  2.531250  13.25000
+## 2 chic   36     31.0 2005-12-30 15.05714       19.2  3.034420  22.80556
+## 3 chic   35     29.4 2005-12-29  7.45000       23.5  6.794837  19.97222
+## 4 chic   37     34.5 2005-12-28 17.75000       27.5  3.260417  19.28563
+## 5 chic   40     33.6 2005-12-27 23.56000       27.0  4.468750  23.50000
+## 6 chic   35     29.6 2005-12-26  8.40000        8.5 14.041667  16.81944
+##   pm25dtrend tempcat
+## 1  -1.230958    cold
+## 2  -1.173815    cold
+## 3  -8.780958    cold
+## 4   1.519042    cold
+## 5   7.329042    cold
+## 6  -7.830958    cold</code></pre>
+<pre class="r"><code># group_by()
+hotcold &lt;- group_by(chicago, tempcat)
+head(hotcold)</code></pre>
+<pre><code>## # A tibble: 6 × 10
+## # Groups:   tempcat [1]
+##   city   tmpd dewpoint date        pm25 pm10tmean2 o3tmean2 no2tmean2 pm25dtrend
+##   &lt;chr&gt; &lt;dbl&gt;    &lt;dbl&gt; &lt;date&gt;     &lt;dbl&gt;      &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;      &lt;dbl&gt;
+## 1 chic     35     30.1 2005-12-31 15          23.5     2.53      13.2      -1.23
+## 2 chic     36     31   2005-12-30 15.1        19.2     3.03      22.8      -1.17
+## 3 chic     35     29.4 2005-12-29  7.45       23.5     6.79      20.0      -8.78
+## 4 chic     37     34.5 2005-12-28 17.8        27.5     3.26      19.3       1.52
+## 5 chic     40     33.6 2005-12-27 23.6        27       4.47      23.5       7.33
+## 6 chic     35     29.6 2005-12-26  8.4         8.5    14.0       16.8      -7.83
+## # ℹ 1 more variable: tempcat &lt;fct&gt;</code></pre>
+<pre class="r"><code>summarize(hotcold, pm25 = mean(pm25, na.rm=T), 
+          o3 = max(o3tmean2))</code></pre>
+<pre><code>##       pm25      o3
+## 1 16.23096 66.5875</code></pre>
+</div>
+<div id="merging-data" class="section level2">
+<h2>Merging data</h2>
+<pre class="r"><code>reviews &lt;- read.csv(&quot;reviews.csv&quot;)
+solutions &lt;- read.csv(&quot;solutions.csv&quot;)
+
+head(reviews,2)</code></pre>
+<pre><code>##   id solution_id reviewer_id      start       stop time_left accept
+## 1  1           3          27 1304095698 1304095758      1754      1
+## 2  2           4          22 1304095188 1304095206      2306      1</code></pre>
+<pre class="r"><code>head(solutions,2)</code></pre>
+<pre><code>##   id problem_id subject_id      start       stop time_left answer
+## 1  1        156         29 1304095119 1304095169      2343      B
+## 2  2        269         25 1304095119 1304095183      2329      C</code></pre>
+<pre class="r"><code>names(reviews)</code></pre>
+<pre><code>## [1] &quot;id&quot;          &quot;solution_id&quot; &quot;reviewer_id&quot; &quot;start&quot;       &quot;stop&quot;       
+## [6] &quot;time_left&quot;   &quot;accept&quot;</code></pre>
+<pre class="r"><code>names(solutions)</code></pre>
+<pre><code>## [1] &quot;id&quot;         &quot;problem_id&quot; &quot;subject_id&quot; &quot;start&quot;      &quot;stop&quot;      
+## [6] &quot;time_left&quot;  &quot;answer&quot;</code></pre>
+<pre class="r"><code># x, y, by, by.x, by.y, all
+mergedData &lt;- merge(reviews, solutions,
+                    by.x = &quot;solution_id&quot;, 
+                    by.y = &quot;id&quot;,
+                    all = T)
+
+head(mergedData)</code></pre>
+<pre><code>##   solution_id id reviewer_id    start.x     stop.x time_left.x accept
+## 1           1  4          26 1304095267 1304095423        2089      1
+## 2           2  6          29 1304095471 1304095513        1999      1
+## 3           3  1          27 1304095698 1304095758        1754      1
+## 4           4  2          22 1304095188 1304095206        2306      1
+## 5           5  3          28 1304095276 1304095320        2192      1
+## 6           6 16          22 1304095303 1304095471        2041      1
+##   problem_id subject_id    start.y     stop.y time_left.y answer
+## 1        156         29 1304095119 1304095169        2343      B
+## 2        269         25 1304095119 1304095183        2329      C
+## 3         34         22 1304095127 1304095146        2366      C
+## 4         19         23 1304095127 1304095150        2362      D
+## 5        605         26 1304095127 1304095167        2345      A
+## 6        384         27 1304095131 1304095270        2242      C</code></pre>
+</div>
+</div>
 
 
 
