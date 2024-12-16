@@ -406,7 +406,137 @@ df %>%
   
 ```
 
+## **ASSIGNMENT**
+```{r}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(hflights)
 
+### exercise 1
+df %>% nrow(); df %>% ncol()
 
+# which and how many airports were involved
+df %>% 
+  select(Origin, Dest) %>% 
+  distinct() %>% 
+  pivot_longer(cols = everything(),
+               names_to = "orig/dest",
+               values_to = "airport") %>% 
+  distinct(airport) %>% 
+  arrange(airport)
 
+# how many flights were cancelled
+df %>% 
+  filter(Cancelled == 1) %>% 
+  nrow()
 
+### exercise 2
+
+# carrier statistics
+carrier.stats <- df %>% 
+  group_by(UniqueCarrier) %>% 
+  summarise(flights = n(),
+            `total distance` = sum(Distance),
+            `total elapsed time` = round(sum(ActualElapsedTime, na.rm = T)/60, 1),
+            `total airtime` = round(sum(AirTime, na.rm = T)/60, 1),
+            `mean distance flown` = mean(Distance),
+            `mean elapsed time` = round(mean(ActualElapsedTime, na.rm = T)/60, 1),
+            `mean airtime`= round(mean(AirTime, na.rm = T)/60,1))
+
+# top 3 performing carriers % of flights 
+carrier.stats %>% 
+  select(UniqueCarrier,
+         distance = `total distance`) %>% 
+  arrange(desc(distance)) %>% 
+  mutate(rank = row_number(),
+         group = case_when(rank <= 3 ~ "top performer",
+                           TRUE ~ "the rest")) %>% 
+  group_by(group) %>% 
+  summarise(carriers = n(),
+            distance = sum(distance)) %>% 
+  ungroup() %>% 
+  mutate(`distance %` = distance / sum(distance) * 100) %>% 
+  arrange(desc(distance))
+
+### exercise 3
+library(stringr)
+library(lubridate)
+
+# add date, quarter and week columns
+df <- hflights
+df <- df %>% 
+  mutate(year = Year,
+         month = Month,
+         dayofmonth = DayofMonth) %>% 
+  mutate_at(.vars = c("Month", "DayofMonth"),
+            .funs = str_pad, 2, "left", "0") %>% 
+  unite(col = "date",
+        Year, Month, DayofMonth, 
+        sep = "-") %>% 
+  mutate(date = ymd(date)) %>% 
+  mutate(quarter = quarter(date),
+         week = isoweek(date)) %>% 
+  select(date, year, month, dayofmonth, quarter, week, DayOfWeek, everything())
+
+head(df)
+
+# is total number of flights increasing or decreasing quarterly
+df %>% 
+  group_by(quarter) %>% 
+  summarise(flights = n()) %>% 
+  ungroup() %>% 
+  mutate(`delta flights`= flights - lag(flights, 1),
+         quarter = as.factor(quarter)) %>% 
+  ggplot(aes(x=quarter, y = `delta flights`)) +
+  geom_col()
+
+# is total distance increasing or decreasing monthly
+df %>% 
+  group_by(month) %>% 
+  summarise(distance = sum(Distance)) %>% 
+  ungroup() %>% 
+  mutate(`delta distance` = distance - lag(distance, 1),
+         month = as.factor(month)) %>% 
+  ggplot(aes(x = month, y = `delta distance`)) +
+  geom_col()
+
+### exercise 4
+
+# create a heatmap:
+# - x:      ~ carrier
+# - y:      ~ month
+# - value:  ~ normalized value number of flights (divide by max value)
+
+df %>% 
+  select(carrier = UniqueCarrier,
+         month) %>% 
+  group_by(carrier, month) %>% 
+  summarise(flights = n()) %>% 
+  ungroup() %>% 
+  mutate(`max fligths`= max(flights),
+         `flights normalized` = flights/`max fligths`) %>% 
+  select(carrier, month, `flights normalized`) %>% 
+  pivot_wider(names_from = month,
+              values_from = `flights normalized`,
+              values_fill = 0) 
+
+# visualize
+
+df %>% 
+  select(carrier = UniqueCarrier,
+         month) %>% 
+  group_by(carrier, month) %>% 
+  summarise(flights = n()) %>% 
+  ungroup() %>% 
+  mutate(`max fligths`= max(flights),
+         `flights normalized` = flights/`max fligths`) %>% 
+  select(carrier, month, `flights normalized`) %>% 
+  mutate(month = as.factor(month)) %>% 
+  ggplot(aes(x = carrier,
+             y = month,
+             fill = `flights normalized`)) +
+  geom_tile() + 
+  scale_fill_viridis_c(option = "magma") + 
+  theme_minimal()
+```
