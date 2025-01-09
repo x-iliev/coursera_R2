@@ -1,0 +1,60 @@
+---
+title: "UDEMY_data_import"
+author: "Hristo Iliev"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tibble)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(hflights)
+```
+
+# {.tabset}
+
+## **Tibble**
+
+```{r}
+class(ggplot2::diamonds)
+
+class(hflights)
+
+dft <- as_tibble(hflights); dft
+
+df <- data.frame(x = 1:10,
+                 y = seq.Date(from = as.Date("2021-01-01"),
+                              to = as.Date("2021-01-10"),
+                              by = "day")); df
+ 
+
+dft <- as_tibble(df); dft
+
+tibble(v1 = seq(1, 100, 1),
+       v2 = pi,
+       v3 = sqrt(v1),
+       v4 = seq.Date(from = as.Date("2021-01-01"),
+                     length.out = 100,
+                     by = "day"))
+
+tribble( # transposed tibble
+  ~name, ~surname, ~male, ~age, # header!
+  "Max", "Smith",    T,    35,
+  "Lily", "Brown",   F,    27)
+
+hflights %>% as_tibble()
+
+class(mpg)
+class(mpg$model) # vector
+class(mpg[["model"]]) # vector
+class(mpg[[2]]) # vector
+
+mpg %>% .$model %>% head() # dot notation
+mpg %>% .[["model"]] %>% head()
+```
+
+## **readr**
